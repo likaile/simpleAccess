@@ -1,0 +1,35 @@
+<?xml version="1.0"?>  
+<configuration>  
+  
+    <!-- ch.qos.logback.core.ConsoleAppender 控制台输出 -->  
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">  
+        <encoder>  
+            <pattern>[%-5level] %d{HH:mm:ss.SSS}  %logger{36} - %msg%n</pattern>  
+        </encoder>  
+    </appender>  
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender"> 
+　　　　　　　　　　　　<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"> 
+　　　　　　　　　　　　　　<fileNamePattern>/logs/simpleAccess.%d{yyyy-MM-dd}.log</fileNamePattern> 
+　　　　　　　　　　　　　　<maxHistory>30</maxHistory> 
+　　　　　　　　　　　　</rollingPolicy> 
+　　　　　　　　　　　　<encoder> 
+　　　　　　　　　　　　　　<pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern> 
+　　　　　　　　　　　　</encoder> 
+　　　　　　　　　　</appender> 
+    
+  	<!-- <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>47.93.6.230:9602</destination>
+        <queueSize>1048576</queueSize>
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder" >
+        	 <customFields>{"appName":"elkDemo"}</customFields>
+        </encoder>
+    </appender> -->
+    <!-- 日志级别 -->  
+    <root>  
+        <level value="info" />  
+        <appender-ref ref="console" />
+         <appender-ref ref="file" />
+       <!--  <appender-ref ref="logstash" />  -->   
+    </root>  
+  
+</configuration>

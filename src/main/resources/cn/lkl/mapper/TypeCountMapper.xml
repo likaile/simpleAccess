@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.lkl.dao.TypeCountDao" >
+  <resultMap id="BaseResultMap" type="cn.lkl.vo.TypeCount" >
+    <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="count" property="count" jdbcType="INTEGER" />
+    <result column="desc1" property="desc" jdbcType="VARCHAR" />
+    <result column="updated" property="updated" jdbcType="VARCHAR" />
+    <result column="companyId" property="companyId" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    type,count,desc1,updated,companyId
+  </sql>
+  
+  <select id="selectAllTypeInfo" resultType="java.lang.Integer">
+		select
+		count(*)
+		from typeCount where companyId = #{companyId}
+</select>
+
+  <select id="selectAllWithTypeName" resultMap="BaseResultMap" >
+		select
+		<include refid="Base_Column_List" />
+		from typeCount  where 
+		 companyId =#{companyId}
+          <if test="type != null and type != '' ">  
+             and   type = #{type}
+            </if>  
+		ORDER BY count DESC
+</select>
+  <select id="selectByType" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from typeCount
+    <where> companyId =#{companyId}
+            <if test="type != null and type != '' ">  
+             and   type = #{type}
+            </if>  
+     </where>  
+  </select> 
+  
+  
+  <update id="updateTypeCount"  parameterType="cn.lkl.vo.TypeCount">
+	 UPDATE typeCount
+	 <trim prefix="set" suffixOverrides=",">
+	  <if test="count!=null">count=#{count},</if>
+	  <if test="updated!=null">updated=#{updated},</if>
+	  <if test="desc!=null">desc1=#{desc}</if>
+	   </trim>
+ WHERE type=#{type} and  companyId = #{companyId}
+</update>
+
+  <insert id="insertSelective" parameterType="cn.lkl.vo.TypeCount" >
+    insert into typeCount
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="count != null" >
+        count,
+      </if>
+      <if test="desc != null" >
+        desc1,
+      </if>
+      <if test="updated != null" >
+        updated,
+      </if>
+       <if test="companyId != null" >
+        companyId
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="type != null" >
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="count != null" >
+        #{count,jdbcType=INTEGER},
+      </if>
+      <if test="desc != null" >
+        #{desc,jdbcType=VARCHAR},
+      </if>
+      <if test="updated != null" >
+        #{updated,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        #{companyId,jdbcType=INTEGER}
+      </if>
+    </trim>
+  </insert>
+</mapper>
