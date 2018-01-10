@@ -48,7 +48,7 @@ public class JspTestController {
     @RequestMapping(value="/test",method=RequestMethod.GET)  
     public String downLoadFile(HttpServletResponse res,
     		@RequestParam(value="fileKey", required=true) String fileKey,
-    		 @RequestParam(value="noticeId", required=true) Long noticeId,
+    		Long noticeId,
     		@RequestParam(value="companyId", required=true) Long companyId) throws Exception{  
 		return fileKey;
     }  

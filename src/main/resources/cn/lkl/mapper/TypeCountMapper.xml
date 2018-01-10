@@ -87,4 +87,11 @@
       </if>
     </trim>
   </insert>
+   <delete id="deleteTypeCount">
+		DELETE FROM
+		typeCount
+		WHERE
+		companyId = #{companyId} and
+		type = #{type}
+	</delete>
 </mapper>

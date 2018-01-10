@@ -18,10 +18,6 @@ public class SimpleAccessApplication extends SpringBootServletInitializer{
 	public static void main(String[] args) {
 		SpringApplication.run(SimpleAccessApplication.class, args);
 	}
-	@RequestMapping("/")
-	public String sayHello() {
-		return "Hello,This is a sample Web Project! My qq num is 417357422 ";
-	}
 	 @Bean
 	 public EmbeddedServletContainerCustomizer containerCustomizer(){
 	        return new EmbeddedServletContainerCustomizer() {

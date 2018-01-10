@@ -15,5 +15,5 @@ public interface TypeInfoDao {
 
 	public TypeInfo queryType(@Param("companyId")Integer companyId,@Param("type")String type);
 
-
+	int deleteTypeInfo(@Param("companyId")Integer companyId,@Param("type")String type);
 }

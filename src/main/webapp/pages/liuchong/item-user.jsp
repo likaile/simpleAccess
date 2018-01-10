@@ -1,7 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<link href="${pageContext.request.contextPath}/js/kindeditor-4.1.10/themes/default/default.css" type="text/css" rel="stylesheet">
-<script type="text/javascript" charset="utf-8" src="${pageContext.request.contextPath}/js/kindeditor-4.1.10/kindeditor-all-min.js"></script>
-<script type="text/javascript" charset="utf-8" src="${pageContext.request.contextPath}/js/kindeditor-4.1.10/lang/zh_CN.js"></script>
+<script type="text/javascript" charset="utf-8" src="${pageContext.request.contextPath}/js/kindeditor-all-min.js"></script>
 <div style="padding:10px 10px 10px 10px">
 	<form id="itemAddUserForm" class="itemForm" method="post">
 	    <table cellpadding="5">
@@ -37,6 +35,12 @@
 		            </td>
 		        </tr>
 		        <tr>
+		            <td>删除商品种类权限:</td>
+		            <td>
+		                <input id="isdelete"  class="easyui-combobox"  type="text" data-options="valueField:'id',textField:'text',width:171" />
+		            </td>
+		        </tr>
+		        <tr>
 		            <td>误操作回滚权限:</td>
 		            <td>
 		                <input id="isCallBack"  class="easyui-combobox"  type="text" data-options="valueField:'id',textField:'text',width:171" />
@@ -59,6 +63,7 @@
 		$("#isEdit").combobox("loadData", typesData);
 		$("#isSave").combobox("loadData", typesData);
 		$("#isCallBack").combobox("loadData", typesData);
+		$("#isdelete").combobox("loadData", typesData);
 	}); 
 	
 	//提交表单
@@ -69,6 +74,7 @@
 		var isAdd = $('#isAdd').combobox('getValue');
 		var isEdit = $('#isEdit').combobox('getValue');
 		var isSave = $('#isSave').combobox('getValue');
+		var isdelete= $('#isdelete').combobox('getValue');
 		var isCallBack = $('#isCallBack').combobox('getValue');
 		//有效性验证
 		if( username==""||password==""){
@@ -80,7 +86,7 @@
 	         type: "POST",
 	         url:"${pageContext.request.contextPath}/access/liuchong/saveUser",
 	         dataType: "json", 
-	         data:{"mobile":mobile,"username":username,"password":password,"isAdd":isAdd,"isEdit":isEdit,"isSave":isSave,"isCallBack":isCallBack}, 
+	         data:{"mobile":mobile,"username":username,"password":password,"isAdd":isAdd,"isEdit":isEdit,"isSave":isSave,"isCallBack":isCallBack,"isDelete":isdelete}, 
 	         success: function(data){
 	        	if(data.code == 1){
 	        		alert("新增用户成功");

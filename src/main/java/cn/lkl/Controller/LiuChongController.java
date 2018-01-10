@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.lkl.dao.UserDao;
 import cn.lkl.service.ILiuChongService;
+import cn.lkl.util.MessageUtils;
 import cn.lkl.util.StringUtils;
 import cn.lkl.vo.ResponseJson;
 import cn.lkl.vo.TranactionList;
@@ -35,13 +36,17 @@ public class LiuChongController
 {
   @Autowired
   private ILiuChongService liuChongService;
+  @Autowired
+  private MessageUtils messageUtils;
   
   public static final String REGEX_MOBILE = "^((17[0-9])|(14[0-9])|(13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$";
   public static final String REGEX_PASSWORD = "^[a-zA-Z0-9]{6,20}$";
   public static Logger logger = LoggerFactory.getLogger(LiuChongController.class);
+  
   public static boolean isMobile(String mobile) {
       return Pattern.matches(REGEX_MOBILE, mobile);
   }
+  
   public static boolean isPassword(String password) {
       return Pattern.matches(REGEX_PASSWORD, password);
   }
@@ -82,6 +87,51 @@ public class LiuChongController
     r.setMessage("用户名或密码错误！");
     return r;
   }
+
+	@RequestMapping(value = { "/liuchong/sendMessage" }, method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseJson sendMessage(HttpServletRequest request) throws Exception {
+		ResponseJson r = new ResponseJson();
+		r.setCode(1);
+		String dothing = request.getParameter("action");
+		if (dothing == null) {
+			r.setMessage("参数有误！");
+			return r;
+		}
+		String action = "";
+		try {
+			action = (String) request.getSession().getAttribute("action");
+		} catch (Exception e) {
+		}
+		if (!action.contains(dothing)) {
+			r.setMessage("无权限进行该操作,请联系管理员开通对应权限！");
+			return r;
+		}
+		//判断session里是否有存在数据
+		Long sendTime = (Long) request.getSession().getAttribute("sendTime");
+		Long time = System.currentTimeMillis();
+		if(null !=sendTime && time-sendTime <5*60*1000) {
+			r.setMessage("验证码还在有效期内");
+			return r;
+		}
+		//发送验证码
+		String mobile = (String) request.getSession().getAttribute("mobile");
+		int code = (int)((Math.random()*9+1)*100000);
+		/*String[] str = {code+"","5"};
+		String result = messageUtils.sendTemplateSMS(mobile, "1", str);
+		if(result.contains("000000")) {
+			request.getSession().setAttribute("verificationCode", code);
+			request.getSession().setAttribute("sendTime", time);
+			r.setCode(0);r.setMessage("验证码发送成功");
+			return r;
+		}
+		r.setMessage("出现错误,请将该报错截图,并联系管理员 "+result);*/
+		request.getSession().setAttribute("verificationCode", code);
+		request.getSession().setAttribute("sendTime", time);
+		r.setCode(1);r.setMessage("因短信验证码收费,需充值1000起步,暂时不上线了...手动写入本次验证码："+code);
+		return r;
+	}
+  
   @RequestMapping(value={"/liuchong/getCountByType"}, method=RequestMethod.POST)
   @ResponseBody
   public ResponseJson getCountByType(HttpServletRequest request)
@@ -102,6 +152,7 @@ public class LiuChongController
   public ResponseJson callBackData(HttpServletRequest request)
   {	
 	ResponseJson r = new ResponseJson();
+	r.setCode(1);
 	String action = "";
 	try {
 		action = (String) request.getSession().getAttribute("action");
@@ -112,13 +163,70 @@ public class LiuChongController
 		return r;
 	}
     String id = request.getParameter("id");
+    String code = request.getParameter("code");
+    String messageCode = "";
+	try {
+		messageCode =  request.getSession().getAttribute("verificationCode").toString();
+	} catch (Exception e) {
+	}
+    if(StringUtils.isEmpty(code)||!code.equals(messageCode)) {
+    	r.setMessage("验证码错误！");
+    	return r;
+    }
     TranactionRecord tr = liuChongService.getTranactionRecordByID(id);
     if(null == tr){
     	r.setMessage("误操作回滚失败，原因该记录不存在");
     	return r;
     }
+    request.getSession().removeAttribute("sendTime");
+    request.getSession().removeAttribute("verificationCode");
+    r.setCode(0);
     r.setMessage(liuChongService.callBackDate(tr));
     return r;
+  }
+  @RequestMapping(value={"/liuchong/deleteData"}, method=RequestMethod.POST)
+  @ResponseBody
+  public ResponseJson deleteData(HttpServletRequest request)
+  {	
+	ResponseJson r = new ResponseJson();
+	r.setCode(1);
+	String action = "";Integer companyId = 0;
+	try {
+		action = (String) request.getSession().getAttribute("action");
+		companyId = (Integer) request.getSession().getAttribute("companyId");
+	} catch (Exception e) {
+	}
+	if(!action.contains("删除")) {
+		r.setMessage("无权限进行该操作,请联系管理员开通删除物品种类权限！");
+		return r;
+	}
+	String code = request.getParameter("code");
+    String messageCode = "";
+	try {
+		messageCode = request.getSession().getAttribute("verificationCode").toString();
+	} catch (Exception e) {
+	}
+    if(StringUtils.isEmpty(code)||!code.equals(messageCode)) {
+    	r.setMessage("验证码错误！");
+    	return r;
+    }
+    String type = request.getParameter("type");
+    Integer count = liuChongService.getCountByType(type, companyId);
+    if(count >0 ) {
+    	r.setMessage(type+"的库存数量不为0");
+    	return r;
+    }
+    try {
+		liuChongService.deleteAllTypeInfo(type,companyId);
+	} catch (Exception e) {
+		r.setMessage("删除失败！错误原因"+e.getMessage()+",请将错误原因截图并联系管理员！");
+		return r;
+	}
+    request.getSession().removeAttribute("sendTime");
+    request.getSession().removeAttribute("verificationCode");
+    r.setCode(0);
+    r.setMessage(type+" 的所有记录删除成功！");
+	return r;
   }
   @RequestMapping({"/page/{page}"})
   public String liuchong(@PathVariable String page, HttpServletRequest request)
@@ -219,6 +327,10 @@ public class LiuChongController
     {
       r.setMessage("参数错误！");
       return r;
+    }
+    if(num1 >100000) {
+	 r.setMessage("作死哦~ 一下进这么多货");
+     return r;
     }
     String addFromUser;
     Integer companyId;
@@ -390,6 +502,7 @@ public class LiuChongController
 	  String isAdd = request.getParameter("isAdd");
 	  String isEdit = request.getParameter("isEdit");
 	  String isSave = request.getParameter("isSave");
+	  String isDelete = request.getParameter("isDelete");
 	  String isCallBack = request.getParameter("isCallBack");
 	  if(StringUtils.isEmpty(mobile)||StringUtils.isEmpty(username)||StringUtils.isEmpty(password)) {
 		  r.setMessage("参数不全,请重新提交");
@@ -404,7 +517,7 @@ public class LiuChongController
 		  return r;
 	  }
 	  Integer companyId = (Integer) request.getSession().getAttribute("companyId");
-	  liuChongService.saveUser(mobile,username,password,isAdd,isEdit,isSave,isCallBack,companyId);
+	  liuChongService.saveUser(mobile,username,password,isAdd,isEdit,isSave,isCallBack,isDelete,companyId);
 	  r.setCode(1);
 	  r.setMessage("新增用户成功！");
 	  return r;
@@ -418,8 +531,18 @@ public class LiuChongController
 	  r.setCode(0);
 	  String oldPassword = request.getParameter("oldPassword");
 	  String newPassword = request.getParameter("newPassword");
+	  String code = request.getParameter("code");
 	  String role = (String) request.getSession().getAttribute("role");
 	  String mobile = (String) request.getSession().getAttribute("mobile");
+	  String messageCode = "";
+		try {
+			messageCode =  request.getSession().getAttribute("verificationCode").toString();
+		} catch (Exception e) {
+		}
+	    if(StringUtils.isEmpty(code)||!code.equals(messageCode)) {
+	    	r.setMessage("验证码错误！");
+	    	return r;
+	    }
 	  if(!oldPassword.equals(liuChongService.selectUserByUserName(mobile).getPassword())) {
 		  r.setMessage("旧密码错误！");
 		  return r;

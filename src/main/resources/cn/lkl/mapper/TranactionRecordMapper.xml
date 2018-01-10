@@ -123,4 +123,11 @@
       </if>
     </trim>
   </insert>
+  <delete id="deleteTranactionRecordByType">
+		DELETE FROM
+		tranactionRecord
+		WHERE
+		companyId = #{companyId} and
+		type = #{type}
+	</delete>
 </mapper>

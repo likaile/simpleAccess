@@ -26,4 +26,7 @@ public interface TypeCountDao {
     //@Select("select password from user_sys where name = #{name}")
 	
 	int selectAllTypeInfo(@Param("companyId")Integer companyId);
+	
+	int deleteTypeCount(@Param("companyId")Integer companyId,@Param("type")String type);
+
 }

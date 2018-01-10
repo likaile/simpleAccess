@@ -27,73 +27,153 @@
 			</select>&nbsp;&nbsp;&nbsp;
             <a href="#" class="easyui-linkbutton"  onclick="itemObj.search()">查询</a>  
         </div>  
-    </div>  
+    </div>
+<div id="ReceiveFeedBackDialog" class="easyui-dialog" closed="true" buttons="#dlg-buttons" align="center" title="即将撤回的记录" style="width:auto;height:auto;">
+	<form id="receiveForm" class="receiveForm" method="post">
+	    <table cellpadding="5">
+	    	<tr>
+	            <td>时间:</td>
+	            <td><span id ="callBackRowDate" style="color:red"></span></td>
+	        </tr>
+	        <tr>
+	            <td>商品:</td>
+	            <td><span id ="callBackRowType" style="color:red"></span></td>
+	        </tr>
+	        <tr>
+	            <td>数量:</td>
+	            <td><span id ="callBackRowNum" style="color:red"></span></td>
+	        </tr>
+	        <tr>
+	            <td>描述:</td>
+	            <td><span id ="callBackRowDesc" style="color:red"></span></td>
+	        </tr>
+	        <tr>
+	            <td><input class="easyui-numberbox" type="text" id="receivePw" data-options="min:0,max:999999,required:true" style="width: 80px;"></input></td>
+	            <td><input class="easyui-linkbutton" id="callBackCode" type="button" onclick="sendCode()" value="免费发送验证码  "/></td>
+	        </tr>
+	    </table>
+	</form>
+</div> 
+    <div id="dlg-buttons">
+        <a href="#" class="easyui-linkbutton" onclick="formSubmit();" id="receiveYes">确认</a> <a href="#"
+            class="easyui-linkbutton" onclick="closeDialog();">取消</a>
+    </div>      
 <script>
-var url = "${pageContext.request.contextPath}/access/liuchong/getTypes";
-$.getJSON(url, function(data) {
-typesData = [];
-var message =data.message.toString();
-allType = message.split(",");
-typesData.push({ "text":"全选", "id": ""});
-for (var i=0;i<allType.length;i++)
-{	
-	typesData.push({ "text":allType[i], "id": allType[i]});
-}
-$("#QueryTypes").combobox("loadData", typesData);
-});
+	function sendCode() { 
+	    curCount = 60;  
+	    //设置button效果，开始计时  
+	    /* $("#callBackCode").attr("disabled", "true");  
+	    $("#callBackCode").val(curCount + "秒后重新获取");  */ 
+	     //向后台发送处理数据  
+	     $.ajax({
+				type : "POST",
+				url : "${pageContext.request.contextPath}/access/liuchong/sendMessage",
+				dataType : "json",
+				data : {
+					"action" : "回滚"
+				},
+				success : function(data) {
+						$.messager.alert('提示',
+								data.message);
+					if(data.code == 0){
+						InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
+					}
+				}
+		});
+	}  
+	//timer处理函数  
+	function SetRemainTime() {  
+	    if (curCount == 0) {                  
+	        window.clearInterval(InterValObj);//停止计时器  
+	        $("#callBackCode").removeAttr("disabled");//启用按钮  
+	        $("#callBackCode").val("重新发送验证码");  
+	    }  
+	    else {  
+	        curCount--;  
+	        $("#callBackCode").val(curCount + "秒后重新获取");  
+	    }  
+	} 
+    var choose ;
+	var url = "${pageContext.request.contextPath}/access/liuchong/getTypes";
+	$.getJSON(url, function(data) {
+		typesData = [];
+		var message = data.message.toString();
+		allType = message.split(",");
+		typesData.push({
+			"text" : "全选",
+			"id" : ""
+		});
+		for (var i = 0; i < allType.length; i++) {
+			typesData.push({
+				"text" : allType[i],
+				"id" : allType[i]
+			});
+		}
+		$("#QueryTypes").combobox("loadData", typesData);
+	});
 
-function formatOper(val,row,index){
-	if(index == 0){
+	function formatOper(val, row, index) {
+		return '<a href="#" onclick="openDialog(' + index + ')">误操作回滚</a>';
 	}
-    	return '<a href="#" onclick="callBackData('+index+')">误操作回滚</a>';  
-}
-function callBackData(index){  
-    $("#itemTransList").datagrid('selectRow',index);// 关键在这里  
-    var row = $('#itemTransList').datagrid('getSelected');  
-    if (row){  
-       var r=confirm("误操作回滚将该恢复该出入库操作之前的数据,且不可恢复，是否确认！")
-       if (r==true)
-       {
-    	   $.ajax({
-    	         type: "POST",
-    	         url:"${pageContext.request.contextPath}/access/liuchong/callBackData",
-    	         dataType: "json", 
-    	         data:{"id":row.id}, 
-    	         success: function(data){
-    	        	alert(data.message);
-    	        	 $("#itemTransList").datagrid('reload');  
-    	         }
-    	    });   
-       }
-    }  
-}  
-$('#QueryTypes').combobox({
-	filter: function(q, row){
-		var opts = $(this).combobox('options');
-		return row[opts.textField].indexOf(q) > -1;
+	function openDialog(index) {
+		$("#itemTransList").datagrid('selectRow', index);// 关键在这里  
+		var row = $('#itemTransList').datagrid('getSelected');
+		$('#callBackRowDate').html(row.created);
+		$('#callBackRowType').html(row.type);
+		$('#callBackRowNum').html(row.num);
+		$('#callBackRowDesc').html(row.reason);
+		choose=row.id; 
+		$('#ReceiveFeedBackDialog').dialog('open');
 	}
-});
- $(function () {
-	 itemObj = {
-        search: function () {
-            $('#itemTransList').datagrid('load', {
-                time:$('#timebox').datebox('getValue'),
-                type:$("#QueryTypes").combobox('getValue'),
-                orderType:$("#orderType").combobox('getValue')
-            });
-        }
-    }
-})
-     function getSelectionsIds(){
-    	var itemList = $("#itemTransList");
-    	var sels = itemList.datagrid("getSelections");
-    	var ids = [];
-    	for(var i in sels){
-    		ids.push(sels[i].id);
-    	}
-    	ids = ids.join(",");
-    	return ids;
-    } 
-    
-    var toolbar = '#tb';
+	function closeDialog() {
+		$('#receiveForm').form('reset');
+		$('#ReceiveFeedBackDialog').dialog('close');
+	}
+	function formSubmit() { 
+		var code =$('#receivePw').val();
+		$.ajax({
+					type : "POST",
+					url : "${pageContext.request.contextPath}/access/liuchong/callBackData",
+					dataType : "json",
+					data : {
+						"id" : choose,"code":code
+					},
+					success : function(data) {
+						$.messager.alert('提示', data.message);
+						if(data.code == 0){
+							closeDialog();
+							$("#itemTransList").datagrid('reload');
+						}
+					}
+				}); 
+	}
+	$('#QueryTypes').combobox({
+		filter : function(q, row) {
+			var opts = $(this).combobox('options');
+			return row[opts.textField].indexOf(q) > -1;
+		}
+	});
+	$(function() {
+		itemObj = {
+			search : function() {
+				$('#itemTransList').datagrid('load', {
+					time : $('#timebox').datebox('getValue'),
+					type : $("#QueryTypes").combobox('getValue'),
+					orderType : $("#orderType").combobox('getValue')
+				});
+			}
+		}
+	})
+	function getSelectionsIds() {
+		var itemList = $("#itemTransList");
+		var sels = itemList.datagrid("getSelections");
+		var ids = [];
+		for ( var i in sels) {
+			ids.push(sels[i].id);
+		}
+		ids = ids.join(",");
+		return ids;
+	}
+
+	var toolbar = '#tb';
 </script>

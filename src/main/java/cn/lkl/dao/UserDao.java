@@ -19,4 +19,5 @@ public interface UserDao {
 	User selectUserByUserName(@Param("mobile")String mobile);
 	
 	List<User> queryAllUser(@Param("companyId")Integer companyId);
+	
 }

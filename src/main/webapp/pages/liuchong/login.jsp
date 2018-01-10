@@ -12,7 +12,16 @@ p{
 }
 /* css注释：为了观察效果设置宽度 边框 高度等样式 */ 
 </style>
+<script type="text/javascript" charset="utf-8"
+	src="${pageContext.request.contextPath}/js/kindeditor-all-min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-easyui-1.4.1/themes/default/easyui.css" />
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-easyui-1.4.1/themes/icon.css" />
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/taotao.css" />
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-easyui-1.4.1/jquery.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-easyui-1.4.1/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-easyui-1.4.1/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/common.js"></script>
 <script type="text/javascript">
 function login(){
 	 $.ajax({
@@ -46,10 +55,10 @@ $(document).keyup(function(event){
 
 	<div class="div">
 		<h1>仓库管理系统</h1>
-		<input type="text" id="username" placeholder="liuchong" value="liuchong"><br />
-		<br /> <input type="password"  id="password" ><br />
+		<input type="text" class="easyui-textbox" id="username" data-options="required:true" style="width: 150px;" ><br />
+		<br /> <input type="password"  id="password" class="easyui-validatebox"  style="width: 150px;" ><br />
 		<br /><br />
-		<button onClick="login();">点我登录</button>
+		<button onClick="login();" class="easyui-linkbutton">点我登录</button>
 		<div>
 			<p id="error" ></p>
 		</div>

@@ -28,6 +28,12 @@
 		            </td>
 		        </tr>
 		        <tr>
+		            <td>删除商品种类权限:</td>
+		            <td>
+		                <input id="delete"  class="easyui-combobox"  type="text" data-options="valueField:'id',textField:'text',width:171" />
+		            </td>
+		        </tr>
+		        <tr>
 		            <td>误操作回滚权限:</td>
 		            <td>
 		                <input id="CallBack"  class="easyui-combobox"  type="text" data-options="valueField:'id',textField:'text',width:171" />

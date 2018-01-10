@@ -45,4 +45,11 @@
       </if>
     </trim>
   </insert>
+  <delete id="deleteTypeInfo">
+		DELETE FROM
+		typeInfo
+		WHERE
+		companyId = #{companyId} and
+		type = #{type}
+	</delete>
 </mapper>

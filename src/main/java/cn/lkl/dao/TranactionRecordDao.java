@@ -18,6 +18,6 @@ public interface TranactionRecordDao {
 	TranactionRecord getTranactionRecordByID(TranactionRecord tr);
 
 	void deleteTranactionRecord(TranactionRecord tr);
-	
+	void deleteTranactionRecordByType(@Param("companyId")Integer companyId,@Param("type")String type);
 	int selectAllTypeTrans(@Param("companyId")Integer companyId);
 }

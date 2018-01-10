@@ -35,7 +35,9 @@ public interface ILiuChongService {
 
 	public boolean queryType(Integer companyId, String type);
 
-	public void saveUser(String mobile, String username, String password, String isAdd, String isEdit, String isSave, String isCallBack, Integer companyId);
+	public void saveUser(String mobile, String username, String password, String isAdd, String isEdit, String isSave, String isCallBack, String isDelete,Integer companyId);
 
 	public void updateUserPwd(String mobile, String newPassword);
+
+	public void deleteAllTypeInfo(String type,Integer companyId) throws Exception;
 }

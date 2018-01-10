@@ -170,7 +170,7 @@ public class LiuChongServiceImpl
   
   public boolean queryType(Integer companyId,String types)
   {
-    return typeInfoDao.queryType(companyId,types) != null;
+    return null != typeInfoDao.queryType(companyId,types);
   }
 
 	@Override
@@ -229,7 +229,7 @@ public class LiuChongServiceImpl
 	}
 
 	@Override
-	public void saveUser(String mobile, String username, String password, String isAdd, String isEdit,String isSave, String isCallBack,Integer companyId) {
+	public void saveUser(String mobile, String username, String password, String isAdd, String isEdit,String isSave, String isCallBack,String isDelete,Integer companyId) {
 		StringBuffer action = new StringBuffer();
 		if(!StringUtils.isEmpty(isAdd)&&isAdd.equals("0")) {
 			action.append("入库,");
@@ -239,6 +239,9 @@ public class LiuChongServiceImpl
 		}
 		if(!StringUtils.isEmpty(isSave)&&isSave.equals("0")) {
 			action.append("新增商品,");
+		}
+		if(!StringUtils.isEmpty(isDelete)&&isCallBack.equals("0")) {
+			action.append("删除,");
 		}
 		if(!StringUtils.isEmpty(isCallBack)&&isCallBack.equals("0")) {
 			action.append("回滚,");
@@ -259,6 +262,14 @@ public class LiuChongServiceImpl
 		user.setMobile(mobile);
 		user.setPassword(newPassword);
 		userDao.updateByPrimaryKeySelective(user);
+	}
+
+	@Override
+	@Transactional
+	public void deleteAllTypeInfo(String type,Integer companyId)throws Exception {
+		typeInfoDao.deleteTypeInfo(companyId, type);
+		typeCountDao.deleteTypeCount(companyId, type);
+		tranactionRecordDao.deleteTranactionRecordByType(companyId, type);
 	}
 
 }
