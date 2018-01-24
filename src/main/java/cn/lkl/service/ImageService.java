@@ -4,4 +4,5 @@ import cn.lkl.vo.JianDanImage;
 
 public interface ImageService {
 	public JianDanImage getImageById(int id);
+	public int getMaxId();
 }

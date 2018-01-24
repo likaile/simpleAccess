@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
@@ -97,7 +98,7 @@ public class ImageController {
 	
 	
 	@RequestMapping(value = "/girl/{height}_{width}")
-	public void randomMessage(HttpServletRequest request, HttpServletResponse response,
+	public void randomPicture(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable Integer height,@PathVariable Integer width
 			) throws IOException {
 		if(height<0||height>300) {
@@ -136,6 +137,47 @@ public class ImageController {
 				res = httpclient.execute(get);
 				entity = res.getEntity();
 				resizeImage(entity.getContent(),response.getOutputStream(),height,width,"jpg");
+			}
+			EntityUtils.consume(entity); // 会自动释放连接 4.2版本以后的新关闭连接方法 close 有风险，放弃
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+	}
+	@RequestMapping(value = "/gif")
+	public void randomGif(HttpServletRequest request, HttpServletResponse response
+			) throws IOException {
+		httpclient = new DefaultHttpClient(new PoolingClientConnectionManager());
+		Integer maxId = ImageService.getMaxId();
+		Random random = new Random();
+		Integer id = random.nextInt(maxId-55278)+55278+1;
+		
+		JianDanImage jiandan = ImageService.getImageById(id);
+		try {
+			String url = "http://" + jiandan.getImage().substring(2, jiandan.getImage().length());
+			logger.info("----gif url :" + url);
+			response.setContentType("image/gif");
+			HttpGet get = new HttpGet(url);
+			HttpResponse res = httpclient.execute(get);
+			HttpEntity entity = res.getEntity();
+			// 打印出返回的流的信息
+			if (entity != null && res.getStatusLine().getStatusCode() == 200) {
+				//resizeImage(entity.getContent(),response.getOutputStream(),height,width,"jpg");
+				ServletOutputStream stream = response.getOutputStream();
+				InputStream inputStream = entity.getContent();
+				byte[] buffer = new byte[4 * 1024];
+				int byteRead = -1;
+				while ((byteRead = (inputStream.read(buffer))) != -1) {
+					stream.write(buffer, 0, byteRead);
+				}
+				stream.flush();
+				inputStream.close();
+				stream.close();
+			} else {
+				url = "http://upload.chinaz.com/upimg/allimg/090330/11153832.jpg";
+				get = new HttpGet(url);
+				res = httpclient.execute(get);
+				entity = res.getEntity();
+				resizeImage(entity.getContent(),response.getOutputStream(),320,220,"jpg");
 			}
 			EntityUtils.consume(entity); // 会自动释放连接 4.2版本以后的新关闭连接方法 close 有风险，放弃
 		} catch (Exception e) {

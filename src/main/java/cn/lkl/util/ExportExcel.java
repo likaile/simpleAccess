@@ -31,6 +31,7 @@ import org.apache.poi.hssf.util.HSSFColor;
  *            byte[]表jpg格式的图片数据
  */
 public class ExportExcel<T> {
+	Pattern p = Pattern.compile("^//d+(//.//d+)?$");
 
 	public void exportExcel(String[] headers, Collection<T> dataset, OutputStream out) {
 		exportExcel("EXCEL文档", headers, dataset, out, "yyyy-MM-dd");
@@ -43,7 +44,7 @@ public class ExportExcel<T> {
 	public void exportExcel(String sheetName, String[] headers, Collection<T> dataset, OutputStream out) {
 		exportExcel(sheetName, headers, dataset, out, "yyyy-MM-dd");
 	}
-
+	
 	/**
 	 * 这是一个通用的方法，利用了JAVA的反射机制，可以将放置在JAVA集合中并且符号一定条件的数据以EXCEL 的形式输出到指定IO设备上
 	 * 
@@ -114,7 +115,7 @@ public class ExportExcel<T> {
 		// 设置注释作者，当鼠标移动到单元格上是可以在状态栏中看到该内容.
 		comment.setAuthor("authorName");
 		*/
-		
+		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 		// 产生表格标题行
 		HSSFRow row = sheet.createRow(0);
 		for (short i = 0; i < headers.length; i++) {
@@ -123,7 +124,6 @@ public class ExportExcel<T> {
 			HSSFRichTextString text = new HSSFRichTextString(headers[i]);
 			cell.setCellValue(text);
 		}
-
 		// 遍历集合数据，产生数据行
 		Iterator<T> it = dataset.iterator();
 		int index = 0;
@@ -149,7 +149,6 @@ public class ExportExcel<T> {
 						textValue = "";
 					} else if (value instanceof Date) {
 						Date date = (Date) value;
-						SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 						textValue = sdf.format(date);
 					} else if (value instanceof byte[]) {
 						// 有图片时，设置行高为60px;
@@ -168,7 +167,6 @@ public class ExportExcel<T> {
 					}
 					// 如果不是图片数据，就利用正则表达式判断textValue是否全部由数字组成
 					if (textValue != null) {
-						Pattern p = Pattern.compile("^//d+(//.//d+)?$");
 						Matcher matcher = p.matcher(textValue);
 						if (matcher.matches()) {
 							// 是数字当作double处理

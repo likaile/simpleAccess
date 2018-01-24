@@ -74,7 +74,7 @@ public class LiuChongServiceImpl
     if (StringUtils.isEmpty(time)) {
         time = sd.format(new Date());
     }else {
-    	if(new Date().getTime()<sd.parse(time).getTime()) {
+    	if(System.currentTimeMillis()<sd.parse(time).getTime()) {
     		throw new Exception("超出当前时间范围!");
     	}
 	    time = sd.format(sd.parse(time));
@@ -112,7 +112,7 @@ public class LiuChongServiceImpl
     if (StringUtils.isEmpty(time)) {
         time = sd.format(new Date());
     }else {
-    	if(new Date().getTime()<sd.parse(time).getTime()) {
+    	if(System.currentTimeMillis()<sd.parse(time).getTime()) {
     		throw new Exception("超出当前时间范围!");
     	}
 	    time = sd.format(sd.parse(time));

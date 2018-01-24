@@ -50,7 +50,7 @@ import cn.lkl.util.BASE64Encoder;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class SimpleAccessApplicationTests {
+public class SimpleAccessApplicationTest {
 	@Autowired
 	private TypeCountDao typeCountDao;
 	@Autowired

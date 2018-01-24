@@ -8,4 +8,6 @@ import cn.lkl.vo.JianDanImage;
 public interface ImageDao {
 	//@Select("SELECT * FROM t_jiandanImage WHERE id = #{id}")
 	public JianDanImage getImageById(int id);
+
+	public int getMaxId();
 }

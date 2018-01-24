@@ -16,5 +16,10 @@ public class ImageServiceImpl implements ImageService {
 	public JianDanImage getImageById(int id) {
 		return ImageMapper.getImageById(id);
 	}
+	@Override
+	public int getMaxId() {
+		return ImageMapper.getMaxId();
+	}
+	
 
 }

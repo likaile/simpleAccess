@@ -14,4 +14,8 @@
     <include refid="Base_Column_List" />
     from t_jiandanImage  where id  = #{id}
   </select>
+   <select id="getMaxId" resultType="java.lang.Integer">
+    select max(id)
+    from t_jiandanImage  
+  </select>
 </mapper>
